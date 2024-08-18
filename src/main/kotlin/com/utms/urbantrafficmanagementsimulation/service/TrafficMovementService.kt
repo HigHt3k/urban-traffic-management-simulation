@@ -1,58 +1,87 @@
 package com.utms.urbantrafficmanagementsimulation.service
 
+import com.utms.urbantrafficmanagementsimulation.model.Intersection
+import com.utms.urbantrafficmanagementsimulation.model.RoadSegment
 import com.utms.urbantrafficmanagementsimulation.model.Vehicle
+import com.utms.urbantrafficmanagementsimulation.repository.IntersectionRepository
+import com.utms.urbantrafficmanagementsimulation.repository.RoadSegmentRepository
 import com.utms.urbantrafficmanagementsimulation.repository.VehicleRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class TrafficMovementService(
-    private val vehicleRepository: VehicleRepository
+    private val vehicleRepository: VehicleRepository,
+    private val roadSegmentRepository: RoadSegmentRepository,
+    private val intersectionRepository: IntersectionRepository
 ) {
     private val logger = LoggerFactory.getLogger(TrafficMovementService::class.java)
 
     fun run() {
+        logger.info("Found following road segments: ${roadSegmentRepository.findAll()}")
+        logger.info("Found following intersections: ${intersectionRepository.findAll()}")
+        logger.info("Found following vehicles: ${vehicleRepository.findAll()}")
+        /*
         val vehicleDTOs = vehicleRepository.findAllVehicles()
         val vehicles = vehicleDTOs.map { dto ->
             dto.vehicle.apply {
-                this.currentLocation = dto.intersection.apply {
-                    this.connectedRoads = dto.roads.map { road ->
-                        road.apply {
-                            // Match the toIntersection by name
-                            this.toIntersection = dto.nextIntersections.find { it.name == road.name.split("-")[1] }
-                        }
-                    }
-                }
+                this.currentLocation = dto.location
             }
         }
         logger.info("Found a total of ${vehicles.size} vehicles")
         vehicles.forEach { vehicle ->
-            logger.info("Current vehicle ${vehicle.type} is at ${vehicle.currentLocation?.name}")
-            logger.info("Moving vehicle with ID: ${vehicle.name} from intersection: ${vehicle.currentLocation?.name}")
+            logger.info("Current vehicle ${vehicle.type} is at ${vehicle.currentLocation}")
+            logger.info("Moving vehicle with ID: ${vehicle.name} from intersection: ${vehicle.currentLocation}")
             moveVehicle(vehicle)
         }
+         */
     }
 
     fun moveVehicle(vehicle: Vehicle) {
-        val currentIntersection = vehicle.currentLocation ?: return
-        val availableRoads = currentIntersection.connectedRoads
+        if(vehicle.currentIntersection != null) {
+            val availableRoads = vehicle.currentIntersection!!.connectedRoads
 
-        if (availableRoads.isEmpty()) {
-            logger.warn("No available roads to move the vehicle with ID: ${vehicle.name} from intersection: ${currentIntersection.name}")
-            return
+            if (availableRoads.isEmpty()) {
+                logger.warn("No available roads to move the vehicle ${vehicle.name} from current position: ${vehicle.currentIntersection}")
+                return
+            }
+
+            // implement targets and simulation exactly here later
+            val nextRoad = availableRoads.random()
+
+            vehicleRepository.removeCurrentIntersectionRelationship(vehicle.name)
+
+            vehicle.currentRoadSegment = nextRoad
+            vehicleRepository.save(vehicle)
         }
 
-        val nextRoad = availableRoads.random()
-        logger.info("Vehicle with ID: ${vehicle.name} is moving from intersection ${currentIntersection.name} to ${nextRoad.toIntersection?.name} via road ${nextRoad.name}")
+        else if (vehicle.currentRoadSegment != null) {
+            val nextLocation = vehicle.currentRoadSegment!!.nextSegment ?: vehicle.currentRoadSegment!!.toIntersection
 
-        // Remove the existing CURRENT_LOCATION relationship
-        vehicleRepository.removeCurrentLocationRelationship(vehicle.name)
+            if (nextLocation == null) {
+                logger.warn("No available roads to move the vehicle ${vehicle.name} from current position: ${vehicle.currentRoadSegment}")
+                return
+            }
 
-        // Update the vehicle's location
-        vehicle.currentLocation = nextRoad.toIntersection
+            vehicleRepository.removeCurrentRoadSegmentRelationship(vehicle.name)
 
-        vehicleRepository.save(vehicle)
-        logger.info("Vehicle with ID: ${vehicle.name} successfully moved to intersection: ${vehicle.currentLocation?.name}")
+            when(nextLocation) {
+                is Intersection -> {
+                    vehicle.currentIntersection = nextLocation
+                    vehicle.currentRoadSegment = null
+                }
+                is RoadSegment -> {
+                    vehicle.currentRoadSegment = nextLocation
+                    vehicle.currentIntersection = null
+                }
+                else -> logger.error("Next segment invalid type")
+            }
+
+            vehicleRepository.save(vehicle)
+        }
+
+        else {
+            logger.error("Unknown location type for vehicle with ${vehicle.name}")
+        }
     }
-
 }

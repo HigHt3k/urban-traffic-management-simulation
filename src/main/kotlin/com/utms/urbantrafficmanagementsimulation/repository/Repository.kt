@@ -1,6 +1,5 @@
 package com.utms.urbantrafficmanagementsimulation.repository
 
-import com.utms.urbantrafficmanagementsimulation.dto.VehicleWithLocationDTO
 import com.utms.urbantrafficmanagementsimulation.model.Intersection
 import com.utms.urbantrafficmanagementsimulation.model.RoadSegment
 import com.utms.urbantrafficmanagementsimulation.model.Vehicle
@@ -18,15 +17,14 @@ interface RoadSegmentRepository: Neo4jRepository<RoadSegment, String>
 interface VehicleRepository : Neo4jRepository<Vehicle, String> {
 
     @Query("""
-        MATCH (v:Vehicle {name: :#{#name}})-[r:CURRENT_LOCATION]->(i:Intersection)
+        MATCH (v:Vehicle {name: :#{#name}})-[r:CURRENT_INTERSECTION]->(i:Intersection)
         DELETE r
     """)
-    fun removeCurrentLocationRelationship(name: String)
+    fun removeCurrentIntersectionRelationship(name: String)
 
     @Query("""
-        MATCH (v:Vehicle)-[r:CURRENT_LOCATION]->(i:Intersection)
-        OPTIONAL MATCH (i)-[:CONNECTED_TO]->(rs:RoadSegment)-[:TO]->(nextIntersection:Intersection)
-        RETURN v AS vehicle, i AS intersection, collect(rs) AS roads, collect(nextIntersection) AS nextIntersections
+        MATCH (v:Vehicle {name: :#{#name}})-[r:CURRENT_ROAD_SEGMENT]->(i:ROAD_SEGMENT)
+        DELETE r
     """)
-    fun findAllVehicles(): List<VehicleWithLocationDTO>
+    fun removeCurrentRoadSegmentRelationship(name: String)
 }

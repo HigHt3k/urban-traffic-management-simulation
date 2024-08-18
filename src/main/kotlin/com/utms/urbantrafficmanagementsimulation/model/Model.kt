@@ -20,6 +20,9 @@ data class RoadSegment(
     var length: Double, //in meters
     var maxSpeed: Double, //in km/h
 
+    @Relationship(type = "NEXT_SEGMENT", direction = Relationship.Direction.OUTGOING)
+    var nextSegment: RoadSegment? = null,
+
     @Relationship(type = "TO", direction = Relationship.Direction.OUTGOING)
     var toIntersection: Intersection? = null
 )
@@ -30,6 +33,9 @@ data class Vehicle(
     var name: String,
     var type: String,
 
-    @Relationship(type = "CURRENT_LOCATION", direction = Relationship.Direction.OUTGOING)
-    var currentLocation: Intersection? = null
+    @Relationship(type = "CURRENT_ROAD_SEGMENT", direction = Relationship.Direction.OUTGOING)
+    var currentRoadSegment: RoadSegment? = null,
+
+    @Relationship(type = "CURRENT_INTERSECTION", direction = Relationship.Direction.OUTGOING)
+    var currentIntersection: Intersection? = null,
 )
