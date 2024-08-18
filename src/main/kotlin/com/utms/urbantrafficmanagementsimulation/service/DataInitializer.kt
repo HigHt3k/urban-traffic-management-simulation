@@ -32,7 +32,7 @@ class DataInitializer(
         val roadAE = RoadSegment(name = "A-E", length = 600.0, maxSpeed = 55.0, toIntersection = intersectionE)
 
         // Set up relationships
-        intersectionA.connectedRoads = listOf(roadAB2, roadAE)
+        intersectionA.connectedRoads = listOf(roadAB1, roadAE)
         intersectionB.connectedRoads = listOf(roadBC)
         intersectionC.connectedRoads = listOf(roadCD)
         intersectionD.connectedRoads = listOf(roadDE)
@@ -53,7 +53,7 @@ class DataInitializer(
 
         // setup vehicles
         val vehicle = Vehicle(type = "car", name = "car1", currentIntersection = intersectionA, currentRoadSegment = null)
-        val vehicle2 = Vehicle(type = "car", name = "car2", currentIntersection = intersectionA, currentRoadSegment = roadAB1)
+        val vehicle2 = Vehicle(type = "car", name = "car2", currentIntersection = null, currentRoadSegment = roadAB1)
         // save vehicles to Neo4j
         vehicleRepository.save(vehicle)
         vehicleRepository.save(vehicle2)

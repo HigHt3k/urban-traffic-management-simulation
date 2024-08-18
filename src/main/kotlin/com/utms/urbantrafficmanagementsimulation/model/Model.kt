@@ -1,12 +1,15 @@
 package com.utms.urbantrafficmanagementsimulation.model
 
+import org.springframework.data.neo4j.core.schema.GeneratedValue
 import org.springframework.data.neo4j.core.schema.Id
 import org.springframework.data.neo4j.core.schema.Relationship
 import org.springframework.data.neo4j.core.schema.Node
+import java.util.*
 
 @Node
 data class Intersection(
-    @Id
+    @Id @GeneratedValue
+    var id: UUID? = null,
     var name: String,
 
     @Relationship(type = "CONNECTED_TO", direction = Relationship.Direction.OUTGOING)
@@ -15,7 +18,8 @@ data class Intersection(
 
 @Node
 data class RoadSegment(
-    @Id
+    @Id @GeneratedValue
+    var id: UUID? = null,
     var name: String,
     var length: Double, //in meters
     var maxSpeed: Double, //in km/h
@@ -29,7 +33,8 @@ data class RoadSegment(
 
 @Node
 data class Vehicle(
-    @Id
+    @Id @GeneratedValue
+    var id: UUID? = null,
     var name: String,
     var type: String,
 

@@ -49,7 +49,7 @@ class TrafficMovementService(
             // implement targets and simulation exactly here later
             val nextRoad = availableRoads.random()
 
-            vehicleRepository.removeCurrentIntersectionRelationship(vehicle.name)
+            vehicle.id?.let { vehicleRepository.removeCurrentIntersectionRelationship(it) }
 
             vehicle.currentRoadSegment = nextRoad
             vehicleRepository.save(vehicle)
@@ -63,7 +63,7 @@ class TrafficMovementService(
                 return
             }
 
-            vehicleRepository.removeCurrentRoadSegmentRelationship(vehicle.name)
+            vehicle.id?.let { vehicleRepository.removeCurrentRoadSegmentRelationship(it) }
 
             when(nextLocation) {
                 is Intersection -> {

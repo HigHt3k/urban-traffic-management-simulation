@@ -6,25 +6,26 @@ import com.utms.urbantrafficmanagementsimulation.model.Vehicle
 import org.springframework.data.neo4j.repository.Neo4jRepository
 import org.springframework.data.neo4j.repository.query.Query
 import org.springframework.stereotype.Repository
+import java.util.UUID
 
 @Repository
-interface IntersectionRepository: Neo4jRepository<Intersection, String>
+interface IntersectionRepository: Neo4jRepository<Intersection, UUID>
 
 @Repository
-interface RoadSegmentRepository: Neo4jRepository<RoadSegment, String>
+interface RoadSegmentRepository: Neo4jRepository<RoadSegment, UUID>
 
 @Repository
-interface VehicleRepository : Neo4jRepository<Vehicle, String> {
+interface VehicleRepository : Neo4jRepository<Vehicle, UUID> {
 
     @Query("""
-        MATCH (v:Vehicle {name: :#{#name}})-[r:CURRENT_INTERSECTION]->(i:Intersection)
+        MATCH (v:Vehicle {id: :#{#id}})-[r:CURRENT_INTERSECTION]->(i:Intersection)
         DELETE r
     """)
-    fun removeCurrentIntersectionRelationship(name: String)
+    fun removeCurrentIntersectionRelationship(id: UUID)
 
     @Query("""
-        MATCH (v:Vehicle {name: :#{#name}})-[r:CURRENT_ROAD_SEGMENT]->(i:ROAD_SEGMENT)
+        MATCH (v:Vehicle {id: :#{#id}})-[r:CURRENT_ROAD_SEGMENT]->(i:ROAD_SEGMENT)
         DELETE r
     """)
-    fun removeCurrentRoadSegmentRelationship(name: String)
+    fun removeCurrentRoadSegmentRelationship(id: UUID)
 }
