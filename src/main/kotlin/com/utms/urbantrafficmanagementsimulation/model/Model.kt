@@ -7,28 +7,15 @@ import org.springframework.data.neo4j.core.schema.Node
 import java.util.*
 
 @Node
-data class Intersection(
+data class Road(
     @Id @GeneratedValue
     var id: UUID? = null,
     var name: String,
+    var length: Double? = null,  // Length in meters (optional for segments)
+    var maxSpeed: Double? = null, // Max speed in km/h (optional for segments)
 
-    @Relationship(type = "CONNECTED_TO", direction = Relationship.Direction.OUTGOING)
-    var connectedRoads: List<RoadSegment> = mutableListOf()
-)
-
-@Node
-data class RoadSegment(
-    @Id @GeneratedValue
-    var id: UUID? = null,
-    var name: String,
-    var length: Double, //in meters
-    var maxSpeed: Double, //in km/h
-
-    @Relationship(type = "NEXT_SEGMENT", direction = Relationship.Direction.OUTGOING)
-    var nextSegment: RoadSegment? = null,
-
-    @Relationship(type = "TO", direction = Relationship.Direction.OUTGOING)
-    var toIntersection: Intersection? = null
+    @Relationship(type = "NEXT", direction = Relationship.Direction.OUTGOING)
+    var next: List<Road> = mutableListOf()
 )
 
 @Node
@@ -38,9 +25,6 @@ data class Vehicle(
     var name: String,
     var type: String,
 
-    @Relationship(type = "CURRENT_ROAD_SEGMENT", direction = Relationship.Direction.OUTGOING)
-    var currentRoadSegment: RoadSegment? = null,
-
-    @Relationship(type = "CURRENT_INTERSECTION", direction = Relationship.Direction.OUTGOING)
-    var currentIntersection: Intersection? = null,
+    @Relationship(type = "CURRENT_LOCATION", direction = Relationship.Direction.OUTGOING)
+    var currentLocation: Road? = null,
 )
