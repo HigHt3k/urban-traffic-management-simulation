@@ -22,7 +22,7 @@ class DataInitializer(
         roadRepository.deleteAll()
         vehicleRepository.deleteAll()
         // Define intersections
-        val elementA = Road(name = "A")
+        val elementA = Road(name = "A", length = 100.0, maxSpeed = 100.0)
         val elementB = Road(name = "B", length = 500.0, maxSpeed = 50.0)
         val elementC = Road(name = "C", length = 300.0, maxSpeed = 40.0)
         val elementD = Road(name = "D", length = 700.0, maxSpeed = 60.0)

@@ -27,4 +27,7 @@ data class Vehicle(
 
     @Relationship(type = "CURRENT_LOCATION", direction = Relationship.Direction.OUTGOING)
     var currentLocation: Road? = null,
+
+    var timeRequired: Double = 0.0, // Time needed to move to the next location
+    var timePassed: Double = 0.0   // Time already spent on the current road
 )

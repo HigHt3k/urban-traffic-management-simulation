@@ -14,22 +14,34 @@ class TrafficMovementService(
     fun run() {
         vehicleRepository.findAll().forEach { vehicle ->
             logger.info("Vehicle: $vehicle")
-            moveVehicle(vehicle)
+            moveVehicle(vehicle, 1.0)
         }
     }
 
-    fun moveVehicle(vehicle: Vehicle) {
-        vehicle.currentLocation?.let { currentLocation ->
-            if (currentLocation.next.isEmpty()) {
-                logger.info("Can't move from $currentLocation - no next road assigned")
-                return
+    fun moveVehicle(vehicle: Vehicle, timeStep: Double) {
+        val currentLocation = vehicle.currentLocation
+        if (currentLocation == null) {
+            logger.error("Vehicle ${vehicle.name} has no current location")
+            return
+        }
+
+        if (vehicle.timeRequired <= vehicle.timePassed) {
+            // Ready to move to the next road segment
+            currentLocation.next.let { nextRoads ->
+                if (nextRoads.isEmpty()) {
+                    logger.info("Can't move from $currentLocation - no next road assigned")
+                    return
+                }
+                val nextLocation = nextRoads.random()
+                vehicle.currentLocation = nextLocation
+                vehicle.timeRequired = nextLocation.length?.div((nextLocation.maxSpeed?.div(3.6)!!)) ?: return // km/h to m/s
+                vehicle.timePassed = 0.0
             }
+        } else {
+            // Increment time passed on the current road
+            vehicle.timePassed += timeStep
+        }
 
-            // Pick a random next location
-            val nextLocation = currentLocation.next.random()
-            vehicle.currentLocation = nextLocation
-
-            vehicleRepository.save(vehicle)
-        } ?: logger.error("Vehicle ${vehicle.name} has no current location")
+        vehicleRepository.save(vehicle)
     }
 }
